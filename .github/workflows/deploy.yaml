@@ -1,36 +1,39 @@
 name: CI/CD Pipeline with Security Scan
 on:
-push:
-branches: [ main ]
+  push:
+    branches: [ main ]
+
 permissions:
-contents: read
-pages: write
-id-token: write
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
-security-scan:
-runs-on: ubuntu-latest
-steps:
-- name: Check out the code
-uses: actions/checkout@v4
-with:
-fetch-depth: 0
-- name: Run Gitleaks secret scan
-uses: gitleaks/gitleaks-action@v2
-env:
-GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out the code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Run Gitleaks secret scan
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 deploy:
-needs: security-scan
-runs-on: ubuntu-latest
-environment:
-name: github-pages
-url: ${{ steps.deployment.outputs.page_url }}
-steps:
-- name: Check out the code
-uses: actions/checkout@v4
-- name: Upload site as Pages artifact
-uses: actions/upload-pages-artifact@v3
-with:
-path: .
-- name: Deploy to GitHub Pages
-id: deployment
-uses: actions/deploy-pages@v4
+  needs: security-scan
+  runs-on: ubuntu-latest
+  environment:
+    name: github-pages
+    url: ${{ steps.deployment.outputs.page_url }}
+  steps:
+    - name: Check out the code
+      uses: actions/checkout@v4
+    - name: Upload site as Pages artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: .
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
